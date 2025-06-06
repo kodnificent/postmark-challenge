@@ -1,0 +1,88 @@
+services:
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        ports:
+            - ${EXPOSED_APP_PORT:-80}:80
+        volumes:
+            - .:/var/www
+            - .docker/php/php.ini:/usr/local/etc/php/php.ini
+            - .docker/app/supervisord.conf:/etc/supervisor/conf.d/supervisord.conf
+            - .docker/app/site.conf:/etc/nginx/http.d/default.conf
+            - .docker/nginx.conf:/etc/nginx/nginx.conf
+        networks:
+            - app
+        depends_on:
+            - db
+            - test_db
+            - redis
+        environment:
+            - SUPERVISOR_OCTANE_COMMAND=php /var/www/artisan octane:start --watch --server=swoole --host=0.0.0.0 --port=8000
+
+    db:
+        image: 'mysql/mysql-server:8.0'
+        environment:
+            MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+            MYSQL_ROOT_HOST: "%"
+            MYSQL_DATABASE: app
+            MYSQL_USER: app
+            MYSQL_PASSWORD: ${DB_PASSWORD}
+            MYSQL_ALLOW_EMPTY_PASSWORD: 1
+        healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-p${DB_PASSWORD}"]
+            retries: 3
+            timeout: 5s
+        networks:
+            - app
+        volumes:
+            - .docker/database/mysql:/var/lib/mysql
+        ports:
+            - ${EXPOSED_DB_PORT:-3306}:3306
+
+    test_db:
+        image: 'mysql/mysql-server:8.0'
+        environment:
+            MYSQL_ROOT_PASSWORD: test
+            MYSQL_ROOT_HOST: "%"
+            MYSQL_DATABASE: test
+            MYSQL_USER: test
+            MYSQL_PASSWORD: test
+            MYSQL_ALLOW_EMPTY_PASSWORD: 1
+        healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-ptest"]
+            retries: 3
+            timeout: 5s
+        tmpfs:
+            - /var/lib/mysql
+        networks:
+            - app
+
+    redis:
+        image: 'redis:alpine'
+        ports:
+            - '${EXPOSED_REDIS_PORT:-6379}:6379'
+        volumes:
+            - .docker/database/redis:/data
+        networks:
+            - app
+        healthcheck:
+            test:
+                - CMD
+                - redis-cli
+                - ping
+            retries: 3
+            timeout: 5s
+
+    mailpit:
+        image: 'axllent/mailpit:latest'
+        ports:
+            - '${EXPOSED_MAILPIT_PORT:-1025}:1025'
+            - '${EXPOSED_MAILPIT_DASHBOARD_PORT:-8025}:8025'
+        networks:
+            - app
+
+networks:
+    app:
+        driver: bridge
+
