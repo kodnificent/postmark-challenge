@@ -9,17 +9,19 @@ class RiskMeterWidget extends ChartWidget
 {
     protected static ?string $pollingInterval = null;
 
+    public int $score = 0;
+
     protected function getData(): array
     {
-        $riskScore = 80; // Replace with actual dynamic value if needed
+        $score = $this->score ?? 0;
 
         return [
             'labels' => ['Risk', 'Remaining'],
             'datasets' => [
                 [
-                    'data' => [$riskScore, 100 - $riskScore],
+                    'data' => [$score, 100 - $score],
                     'backgroundColor' => [
-                        $riskScore <= 20 ? '#22c55e' : ($riskScore <= 40 ? '#facc15' : '#ef4444'),
+                        $score <= 20 ? '#22c55e' : ($score <= 40 ? '#facc15' : '#ef4444'),
                         '#e5e7eb',
                     ],
                     'borderWidth' => 0,
@@ -35,35 +37,20 @@ class RiskMeterWidget extends ChartWidget
 
     protected function getOptions(): array
     {
-        $riskScore = 80; // Match the value from getData()
+        $score = $this->score ?? 0;
 
         return [
             'cutout' => '80%',
             'plugins' => [
                 'legend' => ['display' => false],
                 'tooltip' => ['enabled' => false],
+                'textCenter' => [
+                    'text' => $score . '%'
+                ],
             ],
             'scales' => [
                 'x' => ['display' => false],
                 'y' => ['display' => false],
-            ],
-            'animation' => [
-                'onComplete' => new HtmlString("
-                    function () {
-                    console.log('complete')
-                        const chart = this.chart;
-                        const ctx = chart.ctx;
-                        const width = chart.width;
-                        const height = chart.height;
-                        ctx.save();
-                        ctx.font = 'bold 24px sans-serif';
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-                        ctx.fillStyle = '#111827';
-                        ctx.fillText('$riskScore', width / 2, height / 2);
-                        ctx.restore();
-                    }
-                "),
             ],
         ];
     }

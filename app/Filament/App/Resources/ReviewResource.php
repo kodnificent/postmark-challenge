@@ -3,6 +3,7 @@
 namespace App\Filament\App\Resources;
 
 use App\Filament\App\Resources\ReviewResource\Pages;
+use App\Filament\App\Resources\ReviewResource\RelationManagers\ClausesRelationManager;
 use App\Jobs\StartReview;
 use App\Models\Enums\ReviewStatus;
 use App\Models\Review;
@@ -67,7 +68,7 @@ class ReviewResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            ClausesRelationManager::class,
         ];
     }
 
@@ -82,9 +83,11 @@ class ReviewResource extends Resource
     public static function infolist(Infolist $infolist): Infolist
     {
         return $infolist->schema([
-            Grid::make(1)->schema([
-                TextEntry::make('title'),
-                TextEntry::make('summary'),
+            Grid::make(2)->schema([
+                TextEntry::make('summary')->hiddenLabel(),
+            ]),
+            Grid::make(2)->schema([
+                TextEntry::make('risk_score_comment')->label('Comment'),
             ]),
         ]);
     }
