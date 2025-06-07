@@ -10,10 +10,11 @@ return new class extends Migration
     {
         Schema::create('contract_clauses', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('review_id')->constrained('reviews');
+            $table->foreignId('review_id')->constrained('reviews')->cascadeOnDelete();
             $table->string('title')->nullable();
             $table->string('comment')->nullable();
             $table->tinyInteger('risk_score')->default(0);
+            $table->text('risk_score_comment')->nullable();
             $table->timestamps();
         });
     }

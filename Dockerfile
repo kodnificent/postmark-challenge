@@ -10,7 +10,8 @@ RUN apk add --no-cache \
     supervisor \
     ca-certificates \
     wget \
-    ffmpeg
+    ffmpeg \
+    poppler-utils
 
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 RUN install-php-extensions pdo_mysql exif pcntl sockets gd intl redis zip imagick/imagick@master

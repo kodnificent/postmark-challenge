@@ -10,14 +10,14 @@ return new class extends Migration
     {
         Schema::create('reviews', function (Blueprint $table) {
             $table->id();
-            $table->string('file_disk')->nullable();
-            $table->string('file_path')->nullable();
-            $table->string('file_hash')->nullable();
             $table->string('title')->nullable();
-            $table->string('summary')->nullable();
-            $table->string('status')->default('pending'); // pending, completed, failed
-            $table->string('source')->nullable(); // email, ui
+            $table->text('summary')->nullable();
+            $table->text('content');
+            $table->string('status')->default('pending');
+            $table->string('source');
             $table->tinyInteger('risk_score')->default(0); // 0-100
+            $table->text('risk_score_comment')->nullable();
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->timestamps();
         });
     }
