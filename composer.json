@@ -14,7 +14,8 @@
         "laravel/sanctum": "^4.0",
         "laravel/telescope": "^5.9",
         "laravel/tinker": "^2.10.1",
-        "spatie/pdf-to-text": "^1.54"
+        "spatie/pdf-to-text": "^1.54",
+        "webbingbrasil/filament-copyactions": "^3.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

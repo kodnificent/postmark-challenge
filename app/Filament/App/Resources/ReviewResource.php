@@ -4,6 +4,7 @@ namespace App\Filament\App\Resources;
 
 use App\Filament\App\Resources\ReviewResource\Pages;
 use App\Filament\App\Resources\ReviewResource\RelationManagers\ClausesRelationManager;
+use App\Filament\App\Resources\ReviewResource\Widgets\ContractEmailWidget;
 use App\Jobs\StartReview;
 use App\Models\Enums\ReviewStatus;
 use App\Models\Review;
@@ -16,6 +17,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class ReviewResource extends Resource
 {
@@ -23,8 +25,9 @@ class ReviewResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?string $navigationLabel = 'Contract Reviews';
-    protected static ?string $modelLabel = 'Contract Review';
+    protected static ?string $navigationLabel = 'Contracts';
+
+    protected static ?string $modelLabel = 'Contract';
 
     public static function form(Form $form): Form
     {
@@ -37,9 +40,18 @@ class ReviewResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('id', 'desc')
             ->columns([
                 TextColumn::make('status')
                     ->badge(),
+                Tables\Columns\TextColumn::make('risk_score')
+                    ->label('⚠️ Risk Score')
+                    ->formatStateUsing(function ($state) {
+                        if ($state <= 20) return "✅ {$state}/100";
+                        if ($state <= 40) return "🟡 {$state}/100";
+
+                        return "❗️ {$state}/100";
+                    }),
                 TextColumn::make('title'),
             ])
             ->filters([
@@ -53,9 +65,10 @@ class ReviewResource extends Resource
                     ->action(function ($record) {
                         StartReview::dispatch($record);
 
-                        return Notification::make()
+                        Notification::make()
                             ->title('Contract Queued for retry')
-                            ->success();
+                            ->success()
+                            ->send();
                     }),
             ])
             ->bulkActions([
@@ -90,5 +103,17 @@ class ReviewResource extends Resource
                 TextEntry::make('risk_score_comment')->label('Comment'),
             ]),
         ]);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->where('user_id', request()->user()->id);
+    }
+
+    public static function getWidgets(): array
+    {
+        return [
+            ContractEmailWidget::class,
+        ];
     }
 }

@@ -123,4 +123,5 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'email_forwading_domain' => env('EMAIL_FORWADING_DOMAIN'),
 ];
