@@ -20,7 +20,7 @@ class ViewReview extends ViewRecord
 
     public function getTitle(): string | Htmlable
     {
-        return $this->record->title;
+        return $this->record->title ?? 'Untitled';
     }
 
     protected function getHeaderWidgets(): array
