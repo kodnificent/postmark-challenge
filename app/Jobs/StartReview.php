@@ -16,7 +16,7 @@ class StartReview implements ShouldQueue
     use Queueable;
 
     public function __construct(
-        protected Review $review
+        public Review $review
     ) {}
 
     public function handle(Manager $manager): void

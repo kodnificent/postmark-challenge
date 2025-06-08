@@ -4,7 +4,6 @@ namespace App\Services\Review;
 
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 
 class OpenAi implements Reviewer
 {
@@ -18,53 +17,6 @@ class OpenAi implements Reviewer
     {
         return Http::withToken($this->config['api_key'])
             ->baseUrl(self::BASE_URL);
-    }
-
-    protected function createAssistant(): string
-    {
-        $response = $this->getClient()
-            ->post('/assistants', [
-                'model' => 'gpt-4-turbo',
-                'name' => 'Contract Reviewer',
-                'instructions' => <<<TEXT
-                    You are a legal assistant that reviews legal contracts. A user has uploaded a contract in PDF format.
-
-                    Please read the content and return your analysis.
-
-                    Make sure your response is valid JSON. If the contract seems incomplete or unreadable or is not a contract, say so in the summary and leave the clause list empty.
-                    You must only analyze contracts.
-                TEXT,
-                'tools' => [['type' => 'retrieval']],
-            ])
-            ->throw();
-
-        return $response->json('id');
-    }
-
-    protected function createThread(string $file_id): string
-    {
-        $response = $this->getClient()
-            ->post('/threads', [
-                'messages' => [
-                    'role' => 'user',
-                    'content' => 'Please analyze this contract. I want a plain summary, key clauses with comments and risk scores, and an overall risk score.',
-                    'file_ids' => [$file_id],
-                ],
-            ])
-            ->throw();
-
-        return $response->json('id');
-    }
-
-    protected function runAssistant(string $assistant_id, string $thread_id): string
-    {
-        $response = $this->getClient()
-            ->post("/threads/{$thread_id}/runs", [
-                'assistant_id' => $assistant_id,
-            ])
-            ->throw();
-
-        return $response->json('id');
     }
 
     public function analyze(string $content): Output
