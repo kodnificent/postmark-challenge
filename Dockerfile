@@ -38,7 +38,7 @@ RUN npm install -g bun
 
 COPY .docker .docker
 RUN if [ -f .docker/app/site.conf ]; then cp .docker/app/site.conf /etc/nginx/http.d/default.conf; fi
-RUN if [ -f .docker/app/common.conf ]; then cp .docker/app/site.conf /etc/nginx/common.conf; fi
+RUN if [ -f .docker/app/common.conf ]; then cp .docker/app/common.conf /etc/nginx/common.conf; fi
 COPY .docker/nginx.conf /etc/nginx/nginx.conf
 COPY .docker/php/php.ini $PHP_INI_DIR/php.ini
 COPY .docker/app/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
