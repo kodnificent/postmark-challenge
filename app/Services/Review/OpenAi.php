@@ -20,18 +20,6 @@ class OpenAi implements Reviewer
             ->baseUrl(self::BASE_URL);
     }
 
-    protected function saveFile(string $file): string
-    {
-        $response = $this->getClient()
-            ->attach('file', $file)
-            ->post('/files', [
-                'purpose' => 'assistants',
-            ])
-            ->throw();
-
-        return $response->json('id');
-    }
-
     protected function createAssistant(): string
     {
         $response = $this->getClient()
@@ -39,25 +27,12 @@ class OpenAi implements Reviewer
                 'model' => 'gpt-4-turbo',
                 'name' => 'Contract Reviewer',
                 'instructions' => <<<TEXT
-                    You are a legal assistant. A user has uploaded a contract in PDF format.
+                    You are a legal assistant that reviews legal contracts. A user has uploaded a contract in PDF format.
 
-                    Please read the file and return your analysis in the following JSON format:
+                    Please read the content and return your analysis.
 
-                    {
-                        "title": "Title of the contract here",
-                        "summary": "Plain English summary of the contract here.",
-                        "risk_score": 0, // Integer between 0-100
-                        "clauses": [
-                            {
-                                "title": "Clause title here (e.g. Payment Terms)",
-                                "comment": "Brief comment summarizing what the clause means",
-                                "risk_score": 0 // Integer between 0-100
-                            }
-                            // Repeat for other clauses
-                        ]
-                    }
-
-                    Make sure your response is valid JSON. If the contract seems incomplete or unreadable, say so in the summary and leave the clause list empty.
+                    Make sure your response is valid JSON. If the contract seems incomplete or unreadable or is not a contract, say so in the summary and leave the clause list empty.
+                    You must only analyze contracts.
                 TEXT,
                 'tools' => [['type' => 'retrieval']],
             ])
@@ -103,7 +78,7 @@ class OpenAi implements Reviewer
                         'content' => [
                             [
                                 'type' => 'input_text',
-                                'text' => 'You are a legal assistant that reviews and summarizes contracts for users. You goal is to outline key details of the contract, break down jargons and assign risk score base on your legal knowledge. Output must be strictly json format'
+                                'text' => 'You are a legal assistant that reviews and summarizes contracts for users. You goal is to outline key details of the contract, break down jargons and assign risk score base on your legal knowledge. Output must be strictly json format. If the contract seems incomplete or unreadable or is not a contract, say so in the summary and leave the clause list empty and set the risk score to 0. You must analyze ONLY contracts.'
                             ]
                         ]
                     ],
