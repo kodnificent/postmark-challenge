@@ -38,6 +38,7 @@ RUN npm install -g bun
 
 COPY .docker .docker
 RUN if [ -f .docker/app/site.conf ]; then cp .docker/app/site.conf /etc/nginx/http.d/default.conf; fi
+RUN if [ -f .docker/app/common.conf ]; then cp .docker/app/site.conf /etc/nginx/common.conf; fi
 COPY .docker/nginx.conf /etc/nginx/nginx.conf
 COPY .docker/php/php.ini $PHP_INI_DIR/php.ini
 COPY .docker/app/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
@@ -58,6 +59,14 @@ COPY . /var/www
 
 RUN chown -R www:www /var/www \
     && chmod -R 755 /var/www
+
+# generate self-signed SSL certs for local dev
+RUN mkdir -p /etc/letsencrypt/live/domain.com && \
+    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+    -keyout /etc/letsencrypt/live/domain.com/privkey.pem \
+    -out /etc/letsencrypt/live/domain.com/fullchain.pem \
+    -subj "/C=US/ST=Denial/L=Springfield/O=Dis/CN=localhost" && \
+    chmod 644 /etc/letsencrypt/live/domain.com/*.pem
 
 USER www
 WORKDIR /var/www
