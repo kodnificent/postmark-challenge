@@ -76,6 +76,8 @@ RUN composer install --optimize-autoloader --no-dev --ansi --no-scripts
 RUN bun install && \
     bun run build
 
+RUN php artisan filament:assets
+
 EXPOSE 80 443 5173 9003
 STOPSIGNAL SIGQUIT
 CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
