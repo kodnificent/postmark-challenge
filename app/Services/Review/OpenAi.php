@@ -59,6 +59,7 @@ class OpenAi implements Reviewer
                                 'title' => [
                                     'type' => 'string',
                                     'description' => 'Title of the contract. Not more than 100 Characters',
+                                    'maxLength' => '200',
                                 ],
                                 'summary' => [
                                     'type' => 'string',
@@ -80,7 +81,8 @@ class OpenAi implements Reviewer
                                         'properties' => [
                                             'title' => [
                                                 'type' => 'string',
-                                                'description' => 'Clause Title. Not more than 100 characters'
+                                                'description' => 'Clause Title. Not more than 100 characters',
+                                                'maxLength' => '100',
                                             ],
                                             'comment' => [
                                                 'type' => 'string',
